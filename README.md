@@ -1,7 +1,4 @@
 # LifeLine: Centralized Blood Donation & Management System
-
-<<<<<<< HEAD
-=======
 ## System Architecture
 
 ```text
