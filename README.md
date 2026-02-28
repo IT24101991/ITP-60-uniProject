@@ -1,5 +1,52 @@
 # LifeLine: Centralized Blood Donation & Management System
 
+<<<<<<< HEAD
+=======
+## System Architecture
+
+```text
+       +----------+          +----------+          +----------+
+       |  Admin   |          |  Donor   |          | Hospital |
+       +----+-----+          +----+-----+          +----+-----+
+            |                     |                     |
+            +----------+----------+----------+----------+
+                       | Uses Web App
+                       v
+            +----------------------------+
+            |   Frontend - React 18      |
+            |   + Vite + Axios           |
+            +-------------+--------------+
+                          |
+                          | HTTP REST API / JSON
+                          v
+            +----------------------------+
+            |   Backend - Spring Boot    |
+            |   (Java 21 + Hibernate)    |
+            +-------------+--------------+
+                          |
+      +---------+---------+---------+---------+---------+
+      |         |         |         |         |         |
+      v         v         v         v         v         v
++-----+---+ +---+-----+ +---+-----+ +---+-----+ +---+-----+ +---+-----+
+|  User   | |Inventory| |Emergency| | Appoint | | Health  | |  Test   |
+| Module  | | Module  | | Request | |  ment   | | History | | Results |
++-----+---+ +---+-----+ +---+-----+ +---+-----+ +---+-----+ +---+-----+
+      |         |         |         |         |         |
+      +---------+---------+----+----+---------+---------+
+                               |
+                               v
+                  +----------------------------+
+                  |    Spring Data JPA         |
+                  +-------------+--------------+
+                               |
+                               v
+                  +----------------------------+
+                  |      MySQL Database        |
+                  |     (lifeline_db)          |
+                  +----------------------------+
+```
+
+>>>>>>> imasha
 This guide outlines how to set up and run the LifeLine project using **IntelliJ IDEA**.
 
 ## Prerequisites
