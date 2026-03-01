@@ -1,0 +1,105 @@
+[
+  {
+    "id": "default_who_can_donate",
+    "question": "Who can donate blood?",
+    "answer": "Most healthy adults can donate. Common requirements: age around 18–60/65 years, weight at least 50 kg, feeling well on the day, normal hemoglobin, no fever or active infection, and no high-risk conditions. If you are unsure because of recent illness, pregnancy, major surgery, or certain medications, ask the blood bank staff or your doctor before donating.",
+    "tags": ["eligibility", "who", "default"]
+  },
+  {
+    "id": "eligibility_weight",
+    "question": "What is the minimum weight required to donate blood?",
+    "answer": "Most blood services require donors to weigh at least 50 kg to donate whole blood safely. This helps reduce the risk of dizziness or complications for the donor.",
+    "tags": ["eligibility", "weight"]
+  },
+  {
+    "id": "default_how_often_donate",
+    "question": "How often can I donate blood?",
+    "answer": "For whole blood, men usually donate about every 12 weeks (3 months) and women about every 16 weeks (4 months), depending on local rules. Platelets and plasma can often be donated more frequently according to guidelines. Follow the schedule advised by your blood bank or doctor.",
+    "tags": ["eligibility", "interval", "default"]
+  },
+  {
+    "id": "eligibility_basic_health",
+    "question": "What basic health conditions should I meet before donating blood?",
+    "answer": "You should generally feel well on the day of donation, have no fever or active infection, have normal blood pressure and pulse, and no recent major surgery. Certain chronic diseases, pregnancy, or recent tattoos and piercings may temporarily or permanently defer donation. The medical officer at the blood bank will make the final decision.",
+    "tags": ["eligibility", "health", "conditions"]
+  },
+  {
+    "id": "eligibility_medications",
+    "question": "Can I donate blood if I am taking medication?",
+    "answer": "Many common medications are compatible with blood donation, but some are not. Do not stop any prescribed medicine just to donate. Bring a list of your medicines to the donation center; the medical staff will advise you based on local guidelines.",
+    "tags": ["eligibility", "medication"]
+  },
+  {
+    "id": "process_steps",
+    "question": "What is the typical blood donation process?",
+    "answer": "The usual process is: 1) Registration and identity verification, 2) Answering a health questionnaire and brief medical interview, 3) Basic checks like weight, blood pressure, hemoglobin, and sometimes temperature, 4) The actual blood collection which takes about 8–15 minutes, 5) A short rest with refreshments. The whole visit often takes around 30–45 minutes.",
+    "tags": ["process", "steps", "donation"]
+  },
+  {
+    "id": "default_before_donating",
+    "question": "What should I do before donating?",
+    "answer": "Sleep well, drink plenty of water, and eat a light meal (avoid very fatty foods). Bring a valid ID, avoid alcohol for about 24 hours, and do not donate if you feel unwell. After donation, rest for 10–15 minutes, drink the offered fluids, and keep the bandage on your arm for a few hours.",
+    "tags": ["process", "preparation", "default"]
+  },
+  {
+    "id": "after_donation_care",
+    "question": "What should I do after donating blood?",
+    "answer": "Remain seated or lying down for a short time, drink the fluids provided, and keep the bandage on for a few hours. Avoid heavy lifting with the donation arm and very strenuous exercise for the rest of the day. If you feel dizzy, lie down with your legs raised and inform staff immediately if you are still at the site.",
+    "tags": ["process", "aftercare"]
+  },
+  {
+    "id": "blood_groups_basic",
+    "question": "What are the main blood groups?",
+    "answer": "The main blood group systems are ABO and Rh. The common blood types are A+, A-, B+, B-, AB+, AB-, O+, and O-. In Sri Lanka and many other countries, O+ and A+ are among the most common types, while AB- is quite rare.",
+    "tags": ["blood types", "ABO", "Rh"]
+  },
+  {
+    "id": "compatibility_whole_blood",
+    "question": "Which blood groups are compatible for whole blood transfusion?",
+    "answer": "For whole blood, ABO and Rh compatibility are important. O- is considered the universal donor, and AB+ is the universal recipient, but hospitals still prefer to match as closely as possible. Example: A+ can usually receive from A+ and O+ (and sometimes A-, O-), B+ from B+ and O+, and so on. Final decisions are always made by a transfusion specialist.",
+    "tags": ["blood types", "compatibility"]
+  },
+  {
+    "id": "system_register",
+    "question": "How do I register as a donor in the LifeLine system?",
+    "answer": "To register, open the LifeLine web portal, go to the Register page, and fill in your basic details such as full name, email, and location. After registration you can log in to access your dashboard and donation-related features.",
+    "tags": ["system", "registration", "faq"]
+  },
+  {
+    "id": "default_book_appointment",
+    "question": "How do I book an appointment?",
+    "answer": "On the dashboard, open the Appointments section and select “Book Appointment”. Choose your preferred location or hospital, pick an available date and time, and confirm. The booking will appear under “My Appointments”, where you can view, reschedule, or cancel it if allowed by the system.",
+    "tags": ["system", "appointments", "booking", "default"]
+  },
+  {
+    "id": "system_view_history",
+    "question": "How do I view my donation history?",
+    "answer": "Log in to your LifeLine account and open the Donor Dashboard or Donation History section. There you can see your past donations, basic test results if available, and appointment records. If you cannot see your records, contact the site administrator or blood bank staff.",
+    "tags": ["system", "history", "donor"]
+  },
+  {
+    "id": "default_check_availability",
+    "question": "How can I check blood availability?",
+    "answer": "From the dashboard, go to the Blood Availability or Inventory section, then select the blood group and location or hospital you are interested in. The system shows the current stock and, where available, urgent requests or alerts based on recorded data.",
+    "tags": ["system", "inventory", "availability", "default"]
+  },
+  {
+    "id": "system_support_contact",
+    "question": "How do I contact the administrator or blood bank for help?",
+    "answer": "If the chatbot cannot answer your question, you can contact your site administrator or the blood bank directly. Typical contact options include a support email such as lifeline-support@example.lk, a hotline number published by the National Blood Transfusion Service, or the contact details shown in the system footer.",
+    "tags": ["system", "support", "contact"]
+  },
+  {
+    "id": "deferral_temporary",
+    "question": "When should I temporarily avoid donating blood?",
+    "answer": "You should temporarily avoid donating if you have a fever, active infection, recent major surgery, recent tattoo or piercing, recent childbirth, or if you have traveled to a high-risk malaria or dengue area. The exact deferral period depends on local guidelines, so always check with the medical officer at the donation site.",
+    "tags": ["eligibility", "deferral", "temporary"]
+  },
+  {
+    "id": "deferral_pregnancy",
+    "question": "Can pregnant or breastfeeding women donate blood?",
+    "answer": "Pregnant women should not donate blood. After delivery, women are usually deferred for a period of time (often at least 6 months) and sometimes longer if they are breastfeeding or anemic. Always follow the advice of your doctor and the blood bank medical officer.",
+    "tags": ["eligibility", "pregnancy", "women"]
+  }
+]
+
