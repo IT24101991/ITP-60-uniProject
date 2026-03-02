@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
 const StockDashboard = () => {
-    const [stock, setStock] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const  [stock, setStock] = useState([]);
+    const  [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    useEffect(() =>{
         fetchStock();
     }, []);
+
 
     const fetchStock = async () => {
         try {
@@ -19,6 +20,7 @@ const StockDashboard = () => {
             setLoading(false);
         }
     };
+
 
     const getStatusColor = (status, testStatus) => {
         if (status === 'Bio-Hazard') return '#ffcccc'; // Light Red
