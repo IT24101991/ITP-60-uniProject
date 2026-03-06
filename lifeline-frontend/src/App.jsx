@@ -12,6 +12,9 @@ import CampMap from './pages/CampMap';
 import EmergencyRequests from './pages/EmergencyRequests';
 import EmergencyAlerts from './pages/EmergencyAlerts';
 import LabDashboard from './pages/LabDashboard';
+import HospitalRequests from './pages/HospitalRequests';
+import CredentialManagement from './pages/CredentialManagement';
+import Chatbot from './components/Chatbot';
 import './App.css';
 
 function App() {
@@ -29,13 +32,13 @@ function App() {
                     } />
 
                     <Route path="/inventory" element={
-                        <ProtectedRoute roles={['ADMIN', 'DOCTOR', 'HOSPITAL']}>
+                        <ProtectedRoute roles={['ADMIN', 'LAB']}>
                             <InventoryDashboard />
                         </ProtectedRoute>
                     } />
 
                     <Route path="/lab" element={
-                        <ProtectedRoute roles={['ADMIN', 'DOCTOR', 'HOSPITAL']}>
+                        <ProtectedRoute roles={['ADMIN', 'LAB']}>
                             <LabDashboard />
                         </ProtectedRoute>
                     } />
@@ -64,7 +67,7 @@ function App() {
                     } />
 
                     <Route path="/emergency" element={
-                        <ProtectedRoute roles={['ADMIN', 'DOCTOR', 'HOSPITAL']}>
+                        <ProtectedRoute roles={['ADMIN']}>
                             <EmergencyRequests />
                         </ProtectedRoute>
                     } />
@@ -74,7 +77,20 @@ function App() {
                             <EmergencyAlerts />
                         </ProtectedRoute>
                     } />
+
+                    <Route path="/hospital-requests" element={
+                        <ProtectedRoute roles={['ADMIN', 'HOSPITAL', 'LAB']}>
+                            <HospitalRequests />
+                        </ProtectedRoute>
+                    } />
+
+                    <Route path="/credentials" element={
+                        <ProtectedRoute roles={['ADMIN']}>
+                            <CredentialManagement />
+                        </ProtectedRoute>
+                    } />
                 </Routes>
+                <Chatbot />
             </Router>
         </AuthProvider>
     );

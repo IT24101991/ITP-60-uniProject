@@ -1,15 +1,11 @@
 package com.lifeline.service;
 
 import com.lifeline.model.EmergencyRequest;
-import com.lifeline.model.Inventory;
 import com.lifeline.repository.EmergencyRequestRepository;
-import com.lifeline.repository.InventoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -19,7 +15,7 @@ public class EmergencyRequestService {
     private EmergencyRequestRepository emergencyRequestRepository;
 
     @Autowired
-    private InventoryRepository inventoryRepository;
+    private BloodDispatchService bloodDispatchService;
 
     public EmergencyRequest create(String bloodType, int units, String hospital, String urgency) {
         EmergencyRequest request = new EmergencyRequest();
@@ -57,7 +53,7 @@ public class EmergencyRequestService {
         }
 
         int send = Math.min(remaining, unitsToSend);
-        int sentFromStock = consumeInventory(request.getBloodType(), send);
+        int sentFromStock = bloodDispatchService.consumeUsableStock(request.getBloodType(), send);
         if (sentFromStock <= 0) {
             throw new RuntimeException("No usable stock available for blood type " + request.getBloodType());
         }
@@ -70,36 +66,5 @@ public class EmergencyRequestService {
 
         request.setStatus("PARTIAL");
         return emergencyRequestRepository.save(request);
-    }
-
-    private int consumeInventory(String bloodType, int needed) {
-        int remaining = needed;
-        LocalDate today = LocalDate.now();
-
-        List<Inventory> candidates = inventoryRepository.findAll().stream()
-                .filter(item -> bloodType.equalsIgnoreCase(item.getBloodType()))
-                .filter(item -> item.getQuantity() != null && item.getQuantity() > 0)
-                .filter(item -> item.getExpiryDate() == null || !item.getExpiryDate().isBefore(today))
-                .filter(item -> {
-                    String safety = item.getSafetyFlag() == null ? "" : item.getSafetyFlag().toUpperCase();
-                    String status = item.getStatus() == null ? "" : item.getStatus().toUpperCase();
-                    return "SAFE".equals(safety) || "SAFE".equals(status) || "AVAILABLE".equals(status);
-                })
-                .sorted(Comparator.comparing(Inventory::getExpiryDate, Comparator.nullsLast(LocalDate::compareTo)))
-                .toList();
-
-        for (Inventory bag : candidates) {
-            if (remaining <= 0) break;
-            int qty = bag.getQuantity();
-            int use = Math.min(qty, remaining);
-            bag.setQuantity(qty - use);
-            if (bag.getQuantity() == 0) {
-                bag.setStatus("USED");
-            }
-            inventoryRepository.save(bag);
-            remaining -= use;
-        }
-
-        return needed - remaining;
     }
 }

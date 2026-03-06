@@ -8,6 +8,7 @@ import {
     getDistrictsByProvince,
     getHospitalsByProvinceAndDistrict
 } from '../constants/locationData';
+import loginBackground from '../assets/loginpage.png';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -64,7 +65,16 @@ const Register = () => {
     };
 
     return (
-        <div className="container flex-center" style={{ minHeight: '100vh', padding: '2rem 0' }}>
+        <div className="flex-center" style={{
+            minHeight: '100vh',
+            width: '100%',
+            padding: '2rem 0',
+            backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${loginBackground})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: '#F0F4FF'
+        }}>
             <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem' }}>
                 <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Join LifeLine</h1>

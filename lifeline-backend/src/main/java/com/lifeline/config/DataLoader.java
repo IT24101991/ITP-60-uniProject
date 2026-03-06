@@ -1,8 +1,10 @@
 package com.lifeline.config;
 
+import com.lifeline.model.Camp;
 import com.lifeline.model.Donor;
 import com.lifeline.model.Inventory;
 import com.lifeline.model.User;
+import com.lifeline.repository.CampRepository;
 import com.lifeline.repository.DonorRepository;
 import com.lifeline.repository.InventoryRepository;
 import com.lifeline.repository.UserRepository;
@@ -11,6 +13,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Component
 public class DataLoader implements CommandLineRunner {
@@ -24,6 +27,9 @@ public class DataLoader implements CommandLineRunner {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private CampRepository campRepository;
+
     @Override
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
@@ -31,6 +37,9 @@ public class DataLoader implements CommandLineRunner {
         }
         if (inventoryRepository.count() == 0) {
             seedInventory();
+        }
+        if (campRepository.count() == 0) {
+            seedCamps();
         }
     }
 
@@ -42,6 +51,20 @@ public class DataLoader implements CommandLineRunner {
         admin.setPassword("admin123"); // In real app, use BCrypt
         admin.setRole(User.Role.ADMIN);
         userRepository.save(admin);
+
+        User hospital = new User();
+        hospital.setName("Colombo National Hospital");
+        hospital.setEmail("hospital@lifeline.com");
+        hospital.setPassword("hospital123");
+        hospital.setRole(User.Role.HOSPITAL);
+        userRepository.save(hospital);
+
+        User lab = new User();
+        lab.setName("Lab Technician");
+        lab.setEmail("lab@lifeline.com");
+        lab.setPassword("lab123");
+        lab.setRole(User.Role.LAB);
+        userRepository.save(lab);
 
         // Donor 1: Eligible
         User user1 = new User(null, "John Doe", "john@example.com", "pass123", User.Role.DONOR);
@@ -78,5 +101,19 @@ public class DataLoader implements CommandLineRunner {
         inventoryRepository.save(new Inventory(null, "A-", 1, LocalDate.now().plusDays(35), "UNTESTED", null, "PENDING", null, null, null, null));
 
         System.out.println("Inventory seeded.");
+    }
+
+    private void seedCamps() {
+        campRepository.save(new Camp(null, "Colombo Camp", "Western", "Colombo", "Colombo City Centre",
+                LocalDate.of(2026, 3, 10), LocalTime.of(9, 0), LocalTime.of(13, 0), "Colombo National Hospital", "",
+                6.9271, 79.8612, 0));
+        campRepository.save(new Camp(null, "Kandy Drive", "Central", "Kandy", "Kandy City Center",
+                LocalDate.of(2026, 3, 15), LocalTime.of(10, 30), LocalTime.of(14, 30), "Kandy General Hospital", "",
+                7.2906, 80.6337, 0));
+        campRepository.save(new Camp(null, "Galle Donation Event", "Southern", "Galle", "Galle Fort",
+                LocalDate.of(2026, 3, 20), LocalTime.of(8, 30), LocalTime.of(12, 30), "Galle Teaching Hospital", "",
+                6.0535, 80.2210, 0));
+
+        System.out.println("Camps seeded.");
     }
 }
