@@ -1,6 +1,8 @@
 package com.lifeline.controller;
 
 import com.lifeline.model.Appointment;
+import com.lifeline.model.User;
+import com.lifeline.repository.UserRepository;
 import com.lifeline.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,9 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/book")
     public ResponseEntity<?> bookAppointment(@RequestBody Map<String, Object> payload) {
@@ -62,6 +67,8 @@ public class AppointmentController {
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
         try {
+            Long actingUserId = toLong(payload.get("actingUserId"));
+            ensureCanApproveAppointments(actingUserId);
             String status = payload.getOrDefault("status", "Scheduled").toString();
             Appointment updated = appointmentService.updateStatus(id, status);
             return ResponseEntity.ok(updated);
@@ -84,6 +91,25 @@ public class AppointmentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error cancelling appointment");
+        }
+    }
+
+    private Long toLong(Object value) {
+        if (value == null) {
+            return null;
+        }
+        return Long.valueOf(String.valueOf(value));
+    }
+
+    private void ensureCanApproveAppointments(Long actingUserId) {
+        if (actingUserId == null) {
+            throw new RuntimeException("actingUserId is required.");
+        }
+        User user = userRepository.findById(actingUserId)
+                .orElseThrow(() -> new RuntimeException("Acting user not found."));
+
+        if (user.getRole() != User.Role.ADMIN && user.getRole() != User.Role.HOSPITAL) {
+            throw new RuntimeException("Only hospital or admin users can approve appointments.");
         }
     }
 }

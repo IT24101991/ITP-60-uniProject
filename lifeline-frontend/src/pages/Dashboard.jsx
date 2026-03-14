@@ -2,10 +2,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import loginBackground from '../assets/loginpage.png';
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { isAdmin, isDoctor } = useAuth();
+    const {
+        isAdmin,
+        canViewInventory,
+        canViewLab,
+        canCreateHospitalRequest,
+        canManageCredentials
+    } = useAuth();
     const [recentActivity, setRecentActivity] = useState([]);
     const [inventory, setInventory] = useState([]);
     const [activityLoading, setActivityLoading] = useState(true);
@@ -14,12 +21,14 @@ const Dashboard = () => {
     const [inventoryError, setInventoryError] = useState(false);
 
     const modules = [
-        ...(isAdmin || isDoctor ? [{ title: 'Inventory', desc: 'Manage blood stock & safety', path: '/inventory', color: 'var(--primary)', icon: '📦' }] : []),
-        ...(isAdmin || isDoctor ? [{ title: 'Lab', desc: 'Test completed donations', path: '/lab', color: '#0EA5E9', icon: '🧪' }] : []),
+        ...(canViewInventory ? [{ title: 'Inventory', desc: 'Manage blood stock & safety', path: '/inventory', color: 'var(--primary)', icon: '📦' }] : []),
+        ...(canViewLab ? [{ title: 'Lab', desc: 'Test completed donations', path: '/lab', color: '#0EA5E9', icon: '🧪' }] : []),
+        ...(canCreateHospitalRequest ? [{ title: 'Hospital Requests', desc: 'Request and issue non-emergency blood', path: '/hospital-requests', color: '#2563EB', icon: '🏥' }] : []),
+        ...(canManageCredentials ? [{ title: 'Credentials', desc: 'Assign roles and manage users', path: '/credentials', color: '#7C3AED', icon: '🔐' }] : []),
         { title: 'Donors', desc: 'Register & track donors', path: '/donors', color: '#10B981', icon: '❤️' },
         { title: 'Appointments', desc: 'Schedule and manage bookings', path: '/appointments', color: '#0EA5E9', icon: '🗓️' },
         { title: 'Camps', desc: 'Find donation events', path: '/camps', color: '#F59E0B', icon: '📅' },
-        ...(isAdmin || isDoctor ? [{ title: 'Emergency', desc: 'Broadcast critical alerts', path: '/emergency', color: '#DC2626', icon: '🚨' }] : []),
+        ...(isAdmin ? [{ title: 'Emergency', desc: 'Broadcast critical alerts', path: '/emergency', color: '#DC2626', icon: '🚨' }] : []),
     ];
 
     useEffect(() => {
@@ -37,7 +46,7 @@ const Dashboard = () => {
     }, []);
 
     useEffect(() => {
-        if (!(isAdmin || isDoctor)) {
+        if (!canViewInventory) {
             setInventoryLoading(false);
             return;
         }
@@ -52,7 +61,7 @@ const Dashboard = () => {
                 setInventoryError(true);
                 setInventoryLoading(false);
             });
-    }, [isAdmin, isDoctor]);
+    }, [canViewInventory]);
 
     const formatTimeAgo = (timestamp) => {
         if (!timestamp) return 'Just now';
@@ -93,7 +102,21 @@ const Dashboard = () => {
     }, [recentActivity]);
 
     return (
-        <div className="container" style={{ padding: '2rem 1rem' }}>
+        <div style={{ minHeight: '100vh', width: '100%', position: 'relative', backgroundColor: '#F0F4FF' }}>
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${loginBackground})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                }}
+            />
+        <div className="container" style={{ position: 'relative', zIndex: 1, padding: '2rem 1rem' }}>
             <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>Dashboard</h1>
@@ -179,16 +202,16 @@ const Dashboard = () => {
                 <div className="glass-panel" style={{ padding: '2rem', background: 'linear-gradient(135deg, var(--primary) 0%, #E11D48 100%)', color: 'white' }}>
                     <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Critical Alerts</h3>
                     <div style={{ fontSize: '3rem', fontWeight: 'bold' }}>
-                        {(isAdmin || isDoctor)
+                        {canViewInventory
                             ? (inventoryLoading ? '...' : criticalAlerts.length)
                             : emergencyAlerts.length}
                     </div>
                     <p style={{ opacity: 0.9 }}>
-                        {(isAdmin || isDoctor) && inventoryLoading && 'Checking stock levels...'}
-                        {(isAdmin || isDoctor) && !inventoryLoading && criticalAlerts.length === 0 && 'No critical inventory alerts.'}
-                        {(isAdmin || isDoctor) && !inventoryLoading && criticalAlerts.length > 0 && `Inventory alerts: ${criticalAlerts.length} item(s)`}
-                        {!(isAdmin || isDoctor) && (emergencyAlerts.length > 0 ? `Emergency alerts: ${emergencyAlerts.length}` : 'No emergency alerts.')}
-                        {emergencyAlerts.length > 0 && (isAdmin || isDoctor) && ` • Emergency alerts: ${emergencyAlerts.length}`}
+                        {canViewInventory && inventoryLoading && 'Checking stock levels...'}
+                        {canViewInventory && !inventoryLoading && criticalAlerts.length === 0 && 'No critical inventory alerts.'}
+                        {canViewInventory && !inventoryLoading && criticalAlerts.length > 0 && `Inventory alerts: ${criticalAlerts.length} item(s)`}
+                        {!canViewInventory && (emergencyAlerts.length > 0 ? `Emergency alerts: ${emergencyAlerts.length}` : 'No emergency alerts.')}
+                        {emergencyAlerts.length > 0 && canViewInventory && ` • Emergency alerts: ${emergencyAlerts.length}`}
                     </p>
                     <button style={{
                         marginTop: '1.5rem',
@@ -198,11 +221,12 @@ const Dashboard = () => {
                         borderRadius: 'var(--radius-md)',
                         fontWeight: '600',
                         fontSize: '0.875rem'
-                    }} onClick={() => navigate((isAdmin || isDoctor) ? '/inventory' : '/emergency/alerts')}>
-                        {(isAdmin || isDoctor) ? 'View Inventory' : 'View Alerts'}
+                    }} onClick={() => navigate(canViewInventory ? '/inventory' : '/emergency/alerts')}>
+                        {canViewInventory ? 'View Inventory' : 'View Alerts'}
                     </button>
                 </div>
             </div>
+        </div>
         </div>
     );
 };

@@ -28,6 +28,11 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.getPendingLabBags());
     }
 
+    @GetMapping("/{id}/lab-results")
+    public ResponseEntity<List<Map<String, Object>>> getLabResultsForBag(@PathVariable Long id) {
+        return ResponseEntity.ok(inventoryService.getLabResultsForBag(id));
+    }
+
     @PostMapping("/add")
     public ResponseEntity<Inventory> addBloodBag(@RequestBody Map<String, String> payload) {
         String bloodType = payload.get("bloodType");

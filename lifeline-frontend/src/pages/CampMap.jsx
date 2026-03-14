@@ -8,6 +8,7 @@ import {
     getDistrictsByProvince,
     getHospitalsByProvinceAndDistrict
 } from '../constants/locationData';
+import campsBackground from '../assets/camps.jpg';
 
 const CampMap = () => {
     const navigate = useNavigate();
@@ -123,7 +124,21 @@ const CampMap = () => {
     }, [camps]);
 
     return (
-        <div className="container" style={{ padding: '2rem 1rem' }}>
+        <div style={{ minHeight: '100vh', width: '100%', position: 'relative', backgroundColor: '#F0F4FF' }}>
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${campsBackground})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                }}
+            />
+        <div className="container" style={{ position: 'relative', zIndex: 1, padding: '2rem 1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
                     <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Donation Camps</h1>
@@ -297,6 +312,7 @@ const CampMap = () => {
                     </div>
                 </div>
             )}
+        </div>
         </div>
     );
 };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import loginBackground from '../assets/loginpage.png';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -25,14 +26,8 @@ const Login = () => {
         setError('');
 
         try {
-            const user = await login(formData.email, formData.password);
-            const role = (user?.role || '').toUpperCase();
-
-            if (role === 'ADMIN' || role === 'HOSPITAL' || role === 'DOCTOR') {
-                navigate('/inventory');
-            } else {
-                navigate('/donors');
-            }
+            await login(formData.email, formData.password);
+            navigate('/dashboard');
         } catch (err) {
             setError(err?.response?.data?.message || 'Failed to log in. Please check your credentials.');
         } finally {
@@ -46,7 +41,10 @@ const Login = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #F0F4FF 0%, #FFE4E6 100%)',
+            backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${loginBackground})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
             position: 'relative',
             overflow: 'hidden'
         }}>
@@ -80,22 +78,6 @@ const Login = () => {
                 margin: '1rem'
             }}>
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <div style={{
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '12px',
-                        background: 'var(--primary)',
-                        margin: '0 auto 1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        fontSize: '1.5rem',
-                        boxShadow: 'var(--shadow-glow)'
-                    }}>
-                        L
-                    </div>
                     <h1 style={{ fontSize: '1.875rem', marginBottom: '0.5rem' }}>Welcome Back</h1>
                     <p style={{ color: 'var(--text-muted)' }}>Sign in to access LifeLine</p>
                 </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { LOCATION_DATA } from '../constants/locationData';
+import emergencyBackground from '../assets/emergency.jpg';
 
 const EmergencyRequests = () => {
     const navigate = useNavigate();
@@ -40,7 +41,21 @@ const EmergencyRequests = () => {
 
     if (status === 'success') {
         return (
-            <div className="container flex-center" style={{ minHeight: '80vh' }}>
+            <div style={{ minHeight: '100vh', width: '100%', position: 'relative', backgroundColor: '#F0F4FF' }}>
+                <div
+                    aria-hidden="true"
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${emergencyBackground})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        pointerEvents: 'none',
+                        zIndex: 0
+                    }}
+                />
+            <div className="container flex-center" style={{ minHeight: '80vh', position: 'relative', zIndex: 1 }}>
                 <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px' }}>
                     <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🚑</div>
                     <h2 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Emergency Broadcast Sent!</h2>
@@ -50,12 +65,34 @@ const EmergencyRequests = () => {
                     <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Return to Dashboard</button>
                 </div>
             </div>
+            </div>
         );
     }
 
     return (
-        <div className="container flex-center" style={{ minHeight: '80vh' }}>
+        <div style={{ minHeight: '100vh', width: '100%', position: 'relative', backgroundColor: '#F0F4FF' }}>
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${emergencyBackground})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                }}
+            />
+        <div className="container flex-center" style={{ minHeight: '80vh', position: 'relative', zIndex: 1 }}>
             <div className="glass-panel animate-fade-in" style={{ padding: '2.5rem', width: '100%', maxWidth: '600px', borderLeft: '4px solid var(--primary)' }}>
+                <button
+                    className="btn"
+                    onClick={() => navigate(-1)}
+                    style={{ marginBottom: '1rem', border: '1px solid var(--primary)', color: 'var(--primary)' }}
+                >
+                    Back
+                </button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                     <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#FECDD3', color: '#BE123C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>📢</div>
                     <div>
@@ -120,6 +157,7 @@ const EmergencyRequests = () => {
                     </button>
                 </form>
             </div>
+        </div>
         </div>
     );
 };

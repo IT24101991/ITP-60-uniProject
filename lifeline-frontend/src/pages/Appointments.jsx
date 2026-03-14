@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import scheduleBackground from '../assets/shedule.jpg';
 
 const statusStyles = {
     Scheduled: { background: '#E0F2FE', color: '#0C4A6E' },
@@ -26,7 +27,7 @@ const groupLabels = {
 
 const Appointments = () => {
     const navigate = useNavigate();
-    const { user, isAdmin, isDoctor } = useAuth();
+    const { user, canApproveAppointments } = useAuth();
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -34,7 +35,7 @@ const Appointments = () => {
 
     const fetchAppointments = () => {
         setLoading(true);
-        const url = (isAdmin || isDoctor)
+        const url = canApproveAppointments
             ? 'http://localhost:8080/api/appointments'
             : `http://localhost:8080/api/appointments/donor/${user?.id || 1}`;
         axios.get(url)
@@ -51,7 +52,7 @@ const Appointments = () => {
 
     useEffect(() => {
         fetchAppointments();
-    }, [isAdmin, isDoctor, user?.id]);
+    }, [canApproveAppointments, user?.id]);
 
     const handleCancel = async (id) => {
         setUpdatingId(id);
@@ -69,7 +70,11 @@ const Appointments = () => {
     const handleStatusUpdate = async (id, status) => {
         setUpdatingId(id);
         try {
-            await axios.put(`http://localhost:8080/api/appointments/${id}/status`, { status });
+            await axios.put(`http://localhost:8080/api/appointments/${id}/status`, {
+                status,
+                actingUserId: user?.id
+            });
+
             if (status === 'Completed' || status === 'Approved') {
                 alert('Status updated. If donation is done, blood bag is now available in Lab Dashboard queue.');
             }
@@ -104,16 +109,30 @@ const Appointments = () => {
     }, [appointments]);
 
     return (
-        <div className="container" style={{ padding: '2rem 1rem' }}>
+        <div style={{ minHeight: '100vh', width: '100%', position: 'relative', backgroundColor: '#F0F4FF' }}>
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${scheduleBackground})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                }}
+            />
+        <div className="container" style={{ position: 'relative', zIndex: 1, padding: '2rem 1rem' }}>
             <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Scheduled Bookings</h1>
                     <p style={{ color: 'var(--text-muted)' }}>
-                        {(isAdmin || isDoctor) ? 'Organized by request, approved, finished, and cancelled' : 'Manage your bookings'}
+                        {canApproveAppointments ? 'Organized by request, approved, finished, and cancelled' : 'Manage your bookings'}
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    {!isAdmin && !isDoctor && (
+                    {!canApproveAppointments && (
                         <button className="btn btn-primary" onClick={() => navigate('/appointments/book')}>
                             Book New
                         </button>
@@ -146,7 +165,7 @@ const Appointments = () => {
                                                             <div style={{ fontWeight: '600' }}>
                                                                 Appointment #{appt.id} • {appt.centerType === 'CAMP' ? 'Camp' : 'Hospital'}: {appt.centerName}
                                                             </div>
-                                                            {(isAdmin || isDoctor) && (
+                                                            {canApproveAppointments && (
                                                                 <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                                                                     Donor: {appt.donorName || 'Unknown'} • ID {appt.donorUserId || appt.donor?.id || 'N/A'}
                                                                 </div>
@@ -161,7 +180,7 @@ const Appointments = () => {
                                                     </div>
 
                                                     <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                                                        {!isAdmin && !isDoctor && appt.status !== 'Cancelled' && appt.status !== 'Completed' && (
+                                                        {!canApproveAppointments && appt.status !== 'Cancelled' && appt.status !== 'Completed' && (
                                                             <button
                                                                 className="btn"
                                                                 style={{ border: '1px solid #FCA5A5', color: '#B91C1C' }}
@@ -171,7 +190,7 @@ const Appointments = () => {
                                                                 {updatingId === appt.id ? 'Cancelling...' : 'Cancel Booking'}
                                                             </button>
                                                         )}
-                                                        {(isAdmin || isDoctor) && appt.status !== 'Completed' && appt.status !== 'Cancelled' && (
+                                                        {canApproveAppointments && appt.status !== 'Completed' && appt.status !== 'Cancelled' && (
                                                             <>
                                                                 <button
                                                                     className="btn"
@@ -202,6 +221,7 @@ const Appointments = () => {
                     </div>
                 )}
             </div>
+        </div>
         </div>
     );
 };
