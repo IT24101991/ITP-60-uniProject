@@ -59,7 +59,12 @@ public class AppointmentService {
         // Use the appointment date for checking eligibility
         boolean isEligible = donorService.isEligibleForDate(donor, time.toLocalDate());
         if (!isEligible) {
-            throw new RuntimeException("You are not eligible to donate on this date. Please ensure there is at least a 60-day gap between donations.");
+            Long eligibilityLookupId = donorUserId != null ? donorUserId : donor.getId();
+            Map<String, Object> eligibilityDetails = donorService.getEligibilityDetails(eligibilityLookupId);
+            String reason = eligibilityDetails.get("reason") != null
+                    ? String.valueOf(eligibilityDetails.get("reason"))
+                    : "You are not eligible to donate on this date. Please ensure there is at least a 60-day gap between donations.";
+            throw new RuntimeException(reason);
         }
 
         String normalizedCenterType = centerType == null ? "HOSPITAL" : centerType.trim().toUpperCase();

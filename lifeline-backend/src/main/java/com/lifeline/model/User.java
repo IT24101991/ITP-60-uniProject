@@ -28,6 +28,7 @@ public class User {
     public enum Role {
         ADMIN,
         DONOR,
-        HOSPITAL
+        HOSPITAL,
+        LAB
     }
 }
