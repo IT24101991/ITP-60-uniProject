@@ -1,8 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const InventoryDashboard = () => {
+    const navigate = useNavigate();
     const { isAdmin, isDoctor } = useAuth();
     const canDispatchEmergency = isAdmin || isDoctor;
 
@@ -129,6 +131,13 @@ const InventoryDashboard = () => {
         <div className="container" style={{ padding: '2rem 1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
+                    <button
+                        className="btn"
+                        onClick={() => navigate(-1)}
+                        style={{ marginBottom: '0.75rem', border: '1px solid var(--primary)', color: 'var(--primary)' }}
+                    >
+                        Back
+                    </button>
                     <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Inventory Management</h1>
                     <p style={{ color: 'var(--text-muted)' }}>Real-time blood stock monitoring</p>
                 </div>

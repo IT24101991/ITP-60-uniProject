@@ -11,6 +11,19 @@ const DonorDashboard = () => {
     const [appointments, setAppointments] = useState([]);
     const [nextNearbyCamp, setNextNearbyCamp] = useState(null);
     const [eligibility, setEligibility] = useState({ eligible: true });
+    
+    const formatEligibilityMessage = (details = {}) => {
+        if (details?.type === 'SAFETY') {
+            return details.reason || 'Not eligible because latest test result is positive.';
+        }
+        if (details?.type === 'RECENT_DONATION') {
+            const waitText = typeof details.daysRemaining === 'number'
+                ? ` Wait ${details.daysRemaining} more day(s).`
+                : '';
+            return `${details.reason || 'You donated recently and must wait at least 60 days.'}${waitText}`;
+        }
+        return details.reason || 'You are not eligible to donate right now.';
+    };
 
     useEffect(() => {
         axios.get(`http://localhost:8080/api/donors/user/${donorId}`)
@@ -63,6 +76,13 @@ const DonorDashboard = () => {
     return (
         <div className="container" style={{ padding: '2rem 1rem' }}>
             <header style={{ marginBottom: '3rem' }}>
+                <button
+                    className="btn"
+                    onClick={() => navigate(-1)}
+                    style={{ marginBottom: '0.75rem', border: '1px solid var(--primary)', color: 'var(--primary)' }}
+                >
+                    Back
+                </button>
                 <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Donor Portal</h1>
                 <p style={{ color: 'var(--text-muted)' }}>Welcome back, Hero.</p>
                 {donorData?.safetyStatus === 'POSITIVE' && (
@@ -133,7 +153,7 @@ const DonorDashboard = () => {
                         </button>
                         {!eligibility.eligible && eligibility.reason && (
                             <p style={{ fontSize: '0.75rem', color: '#991B1B', marginTop: '0.5rem', fontWeight: '500' }}>
-                                ⚠️ {eligibility.reason}
+                                ⚠️ {formatEligibilityMessage(eligibility)}
                                 {eligibility.nextEligibleDate && ` (Available from ${new Date(eligibility.nextEligibleDate).toLocaleDateString()})`}
                             </p>
                         )}

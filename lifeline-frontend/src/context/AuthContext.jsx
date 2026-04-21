@@ -33,20 +33,28 @@ export const AuthProvider = ({ children }) => {
         return userData;
     };
 
-    const register = (data) => {
-        // Mock Registration Logic
-        const newUser = {
-            id: Math.floor(Math.random() * 1000),
-            name: data.fullName,
+    const register = async (data) => {
+        const response = await api.post('/api/auth/register', {
+            fullName: data.fullName,
             email: data.email,
-            role: 'DONOR',
+            password: data.password,
+            bloodType: data.bloodType
+        });
+        const payload = response?.data || {};
+
+        const newUser = {
+            id: payload.userId,
+            userId: payload.userId,
+            name: payload.name,
+            email: payload.email,
+            role: payload.role || 'DONOR',
             province: data.province,
             district: data.district,
             nearestHospital: data.nearestHospital
         };
         setUser(newUser);
         localStorage.setItem('lifeline_user', JSON.stringify(newUser));
-        return Promise.resolve(newUser);
+        return newUser;
     };
 
     const logout = () => {

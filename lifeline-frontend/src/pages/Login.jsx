@@ -25,14 +25,8 @@ const Login = () => {
         setError('');
 
         try {
-            const user = await login(formData.email, formData.password);
-            const role = (user?.role || '').toUpperCase();
-
-            if (role === 'ADMIN' || role === 'HOSPITAL' || role === 'DOCTOR') {
-                navigate('/inventory');
-            } else {
-                navigate('/donors');
-            }
+            await login(formData.email, formData.password);
+            navigate('/dashboard');
         } catch (err) {
             setError(err?.response?.data?.message || 'Failed to log in. Please check your credentials.');
         } finally {

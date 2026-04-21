@@ -1,5 +1,8 @@
 package com.lifeline.service;
 
+import com.lifeline.model.Camp;
+import com.lifeline.repository.CampRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -10,124 +13,58 @@ import java.util.*;
 @Service
 public class CampService {
 
-    private final List<Map<String, Object>> camps = new ArrayList<>();
+    @Autowired
+    private CampRepository campRepository;
 
-    public CampService() {
-        seedCamp(1, "Colombo Camp", "Western", "Colombo", "Colombo City Centre",
-                "2026-03-10", "09:00", "13:00", "Colombo National Hospital", "", 6.9271, 79.8612);
-        seedCamp(2, "Kandy Drive", "Central", "Kandy", "Kandy City Center",
-                "2026-03-15", "10:30", "14:30", "Kandy General Hospital", "", 7.2906, 80.6337);
-        seedCamp(3, "Galle Donation Event", "Southern", "Galle", "Galle Fort",
-                "2026-03-20", "08:30", "12:30", "Galle Teaching Hospital", "", 6.0535, 80.2210);
-    }
-
-    private void seedCamp(int id, String name, String province, String district, String location,
-                          String date, String startTime, String endTime, String nearestHospital,
-                          String googleMapLink, double lat, double lng) {
-        Map<String, Object> camp = new HashMap<>();
-        camp.put("id", id);
-        camp.put("name", name);
-        camp.put("province", province);
-        camp.put("district", district);
-        camp.put("location", location);
-        camp.put("date", date);
-        camp.put("startTime", startTime);
-        camp.put("endTime", endTime);
-        camp.put("nearestHospital", nearestHospital);
-        camp.put("googleMapLink", googleMapLink);
-        camp.put("lat", lat);
-        camp.put("lng", lng);
-        camp.put("interestCount", 0);
-        camps.add(camp);
-    }
-
-    public synchronized List<Map<String, Object>> getAllCamps() {
+    public List<Map<String, Object>> getAllCamps() {
         List<Map<String, Object>> withStatus = new ArrayList<>();
-        for (Map<String, Object> camp : camps) {
+        for (Camp camp : campRepository.findAll()) {
             withStatus.add(enrichCamp(camp));
         }
         return withStatus;
     }
 
-    public synchronized Optional<Map<String, Object>> findCampById(int id) {
-        return camps.stream()
-                .filter(c -> Integer.parseInt(c.get("id").toString()) == id)
-                .findFirst();
+    public Optional<Map<String, Object>> findCampById(int id) {
+        return campRepository.findById((long) id).map(this::toCampMap);
     }
 
-    public synchronized Optional<Map<String, Object>> findCampByIdWithStatus(int id) {
-        return findCampById(id).map(this::enrichCamp);
+    public Optional<Map<String, Object>> findCampByIdWithStatus(int id) {
+        return campRepository.findById((long) id).map(this::enrichCamp);
     }
 
-    public synchronized Map<String, Object> createCamp(Map<String, Object> campData) {
-        int maxId = camps.stream()
-                .mapToInt(c -> Integer.parseInt(c.get("id").toString()))
-                .max()
-                .orElse(0);
-        campData.put("id", maxId + 1);
+    public Map<String, Object> createCamp(Map<String, Object> campData) {
+        Camp camp = buildCampWithDefaults(campData);
 
-        if (!campData.containsKey("date")) {
-            campData.put("date", LocalDate.now().plusDays(1).toString());
-        }
-        if (!campData.containsKey("startTime")) {
-            campData.put("startTime", "09:00");
-        }
-        if (!campData.containsKey("endTime")) {
-            campData.put("endTime", "13:00");
-        }
-        if (!campData.containsKey("interestCount")) {
-            campData.put("interestCount", 0);
-        }
-        if (!campData.containsKey("lat")) {
-            campData.put("lat", 6.9271);
-        }
-        if (!campData.containsKey("lng")) {
-            campData.put("lng", 79.8612);
-        }
-        if (!campData.containsKey("province")) {
-            campData.put("province", "Western");
-        }
-        if (!campData.containsKey("district")) {
-            campData.put("district", "Colombo");
-        }
-        if (!campData.containsKey("nearestHospital")) {
-            campData.put("nearestHospital", "Colombo National Hospital");
-        }
-        if (!campData.containsKey("googleMapLink")) {
-            campData.put("googleMapLink", "");
-        }
-
-        LocalDateTime start = getCampStart(campData);
-        LocalDateTime end = getCampEnd(campData);
+        LocalDateTime start = LocalDateTime.of(camp.getDate(), camp.getStartTime());
+        LocalDateTime end = LocalDateTime.of(camp.getDate(), camp.getEndTime());
         if (!end.isAfter(start)) {
             throw new RuntimeException("Camp end time must be after start time.");
         }
 
-        camps.add(campData);
-        return enrichCamp(campData);
+        Camp saved = campRepository.save(camp);
+        return enrichCamp(saved);
     }
 
-    public synchronized Optional<Map<String, Object>> deleteCamp(int id) {
-        Iterator<Map<String, Object>> iterator = camps.iterator();
-        while (iterator.hasNext()) {
-            Map<String, Object> camp = iterator.next();
-            if (Integer.parseInt(camp.get("id").toString()) == id) {
-                iterator.remove();
-                return Optional.of(enrichCamp(camp));
-            }
-        }
-        return Optional.empty();
-    }
-
-    public synchronized Optional<Map<String, Object>> registerInterest(int id) {
-        Optional<Map<String, Object>> campOpt = findCampById(id);
+    public Optional<Map<String, Object>> deleteCamp(int id) {
+        Optional<Camp> campOpt = campRepository.findById((long) id);
         if (campOpt.isEmpty()) {
             return Optional.empty();
         }
-        Map<String, Object> camp = campOpt.get();
-        int current = Integer.parseInt(String.valueOf(camp.getOrDefault("interestCount", 0)));
-        camp.put("interestCount", current + 1);
+        Camp camp = campOpt.get();
+        campRepository.delete(camp);
         return Optional.of(enrichCamp(camp));
+    }
+
+    public Optional<Map<String, Object>> registerInterest(int id) {
+        Optional<Camp> campOpt = campRepository.findById((long) id);
+        if (campOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        Camp camp = campOpt.get();
+        int current = camp.getInterestCount() == null ? 0 : camp.getInterestCount();
+        camp.setInterestCount(current + 1);
+        Camp saved = campRepository.save(camp);
+        return Optional.of(enrichCamp(saved));
     }
 
     public LocalDateTime getCampStart(Map<String, Object> camp) {
@@ -142,8 +79,8 @@ public class CampService {
         return LocalDateTime.of(date, end);
     }
 
-    private Map<String, Object> enrichCamp(Map<String, Object> original) {
-        Map<String, Object> copy = new HashMap<>(original);
+    private Map<String, Object> enrichCamp(Camp camp) {
+        Map<String, Object> copy = toCampMap(camp);
         LocalDateTime start = getCampStart(copy);
         LocalDateTime end = getCampEnd(copy);
         LocalDateTime now = LocalDateTime.now();
@@ -162,5 +99,86 @@ public class CampService {
             copy.put("time", copy.getOrDefault("startTime", "09:00"));
         }
         return copy;
+    }
+
+    private Map<String, Object> toCampMap(Camp camp) {
+        Map<String, Object> campMap = new HashMap<>();
+        campMap.put("id", camp.getId());
+        campMap.put("name", camp.getName());
+        campMap.put("province", camp.getProvince());
+        campMap.put("district", camp.getDistrict());
+        campMap.put("location", camp.getLocation());
+        campMap.put("date", camp.getDate() != null ? camp.getDate().toString() : null);
+        campMap.put("startTime", camp.getStartTime() != null ? camp.getStartTime().toString() : null);
+        campMap.put("endTime", camp.getEndTime() != null ? camp.getEndTime().toString() : null);
+        campMap.put("nearestHospital", camp.getNearestHospital());
+        campMap.put("googleMapLink", camp.getGoogleMapLink());
+        campMap.put("lat", camp.getLat());
+        campMap.put("lng", camp.getLng());
+        campMap.put("interestCount", camp.getInterestCount() == null ? 0 : camp.getInterestCount());
+        return campMap;
+    }
+
+    private Camp buildCampWithDefaults(Map<String, Object> campData) {
+        Camp camp = new Camp();
+        camp.setName(getString(campData, "name"));
+        camp.setLocation(getString(campData, "location"));
+        camp.setDate(parseDate(campData.get("date"), LocalDate.now().plusDays(1)));
+        camp.setStartTime(parseTime(campData.get("startTime"), LocalTime.of(9, 0)));
+        camp.setEndTime(parseTime(campData.get("endTime"), LocalTime.of(13, 0)));
+        camp.setInterestCount(parseInt(campData.get("interestCount"), 0));
+        camp.setLat(parseDouble(campData.get("lat"), 6.9271));
+        camp.setLng(parseDouble(campData.get("lng"), 79.8612));
+        camp.setProvince(getStringOrDefault(campData, "province", "Western"));
+        camp.setDistrict(getStringOrDefault(campData, "district", "Colombo"));
+        camp.setNearestHospital(getStringOrDefault(campData, "nearestHospital", "Colombo National Hospital"));
+        camp.setGoogleMapLink(getStringOrDefault(campData, "googleMapLink", ""));
+        return camp;
+    }
+
+    private String getString(Map<String, Object> source, String key) {
+        Object value = source.get(key);
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private String getStringOrDefault(Map<String, Object> source, String key, String fallback) {
+        String value = getString(source, key);
+        return (value == null || value.isBlank()) ? fallback : value;
+    }
+
+    private LocalDate parseDate(Object value, LocalDate fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        String text = String.valueOf(value).trim();
+        if (text.isEmpty()) {
+            return fallback;
+        }
+        return LocalDate.parse(text);
+    }
+
+    private LocalTime parseTime(Object value, LocalTime fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        String text = String.valueOf(value).trim();
+        if (text.isEmpty()) {
+            return fallback;
+        }
+        return LocalTime.parse(text);
+    }
+
+    private int parseInt(Object value, int fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        return Integer.parseInt(String.valueOf(value));
+    }
+
+    private double parseDouble(Object value, double fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        return Double.parseDouble(String.valueOf(value));
     }
 }

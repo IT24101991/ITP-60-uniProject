@@ -56,6 +56,13 @@ const EmergencyRequests = () => {
     return (
         <div className="container flex-center" style={{ minHeight: '80vh' }}>
             <div className="glass-panel animate-fade-in" style={{ padding: '2.5rem', width: '100%', maxWidth: '600px', borderLeft: '4px solid var(--primary)' }}>
+                <button
+                    className="btn"
+                    onClick={() => navigate(-1)}
+                    style={{ marginBottom: '1rem', border: '1px solid var(--primary)', color: 'var(--primary)' }}
+                >
+                    Back
+                </button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                     <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#FECDD3', color: '#BE123C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>📢</div>
                     <div>

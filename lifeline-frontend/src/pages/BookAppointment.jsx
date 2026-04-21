@@ -31,6 +31,22 @@ const BookAppointment = () => {
     });
     const [submitting, setSubmitting] = useState(false);
     const isSubmittingRef = React.useRef(false);
+    
+    const formatEligibilityMessage = (details = {}) => {
+        if (details?.type === 'SAFETY') {
+            return details.reason || 'You are not eligible to donate because your latest test result is positive.';
+        }
+        if (details?.type === 'RECENT_DONATION') {
+            const dayText = typeof details.daysRemaining === 'number'
+                ? ` Please wait ${details.daysRemaining} more day(s).`
+                : '';
+            const nextDateText = details.nextEligibleDate
+                ? ` Next eligible date: ${new Date(details.nextEligibleDate).toLocaleDateString()}.`
+                : '';
+            return `${details.reason || 'You donated recently and must wait at least 60 days before booking again.'}${dayText}${nextDateText}`;
+        }
+        return details.reason || 'You are not eligible to donate right now.';
+    };
 
     useEffect(() => {
         const checkEligibility = async () => {
@@ -42,6 +58,7 @@ const BookAppointment = () => {
                     eligible: res.data.eligible,
                     reason: res.data.reason,
                     type: res.data.type,
+                    daysRemaining: res.data.daysRemaining,
                     nextEligibleDate: res.data.nextEligibleDate
                 });
             } catch (err) {
@@ -161,7 +178,7 @@ const BookAppointment = () => {
             const eligibilityResponse = await axios.get(`http://localhost:8080/api/donors/${donorId}/eligibility`);
             const isEligible = Boolean(eligibilityResponse.data?.eligible);
             if (!isEligible) {
-                alert(eligibilityResponse.data?.reason || 'You are not eligible to donate right now. Please try again after the waiting period.');
+                alert(formatEligibilityMessage(eligibilityResponse.data));
                 setSubmitting(false);
                 isSubmittingRef.current = false;
                 return;
@@ -205,7 +222,7 @@ const BookAppointment = () => {
                     <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🛑</div>
                     <h2 style={{ color: '#991B1B', marginBottom: '1rem' }}>Booking Restricted</h2>
                     <p style={{ color: 'var(--text-main)', marginBottom: '1.5rem', fontWeight: '500' }}>
-                        {eligibilityInfo.reason}
+                        {formatEligibilityMessage(eligibilityInfo)}
                     </p>
                     {eligibilityInfo.nextEligibleDate && (
                         <div style={{ background: '#FEF2F2', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '2rem' }}>
