@@ -2,11 +2,16 @@ import React, { useMemo, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import inventoryBackground from '../assets/inventory.png';
 
 const InventoryDashboard = () => {
     const navigate = useNavigate();
+<<<<<<< HEAD
     const { isAdmin, isDoctor } = useAuth();
     const canDispatchEmergency = isAdmin || isDoctor;
+=======
+    const { user, isAdmin, canDispatchEmergency, canDispatchHospitalRequest } = useAuth();
+>>>>>>> 8a481ac751daa3abc140972bf4f03334cf62e322
 
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,6 +20,11 @@ const InventoryDashboard = () => {
     const [requestLoadError, setRequestLoadError] = useState('');
     const [sendingForRequest, setSendingForRequest] = useState({});
     const [dispatchLoading, setDispatchLoading] = useState(null);
+
+    const [hospitalRequests, setHospitalRequests] = useState([]);
+    const [hospitalRequestError, setHospitalRequestError] = useState('');
+    const [hospitalSending, setHospitalSending] = useState({});
+    const [hospitalDispatchLoading, setHospitalDispatchLoading] = useState(null);
 
     const fetchInventory = () => {
         setLoading(true);
@@ -32,13 +42,22 @@ const InventoryDashboard = () => {
             });
     };
 
-    const mapDefaults = (data) => {
+    const mapEmergencyDefaults = (data) => {
         const defaults = {};
         data.filter(r => (r.status || '').toUpperCase() !== 'FULFILLED').forEach(r => {
             const remaining = Math.max(0, (r.unitsRequested || 0) - (r.unitsFulfilled || 0));
             defaults[r.id] = String(Math.max(1, remaining));
         });
         setSendingForRequest(defaults);
+    };
+
+    const mapHospitalDefaults = (data) => {
+        const defaults = {};
+        data.filter(r => (r.status || '').toUpperCase() !== 'ISSUED').forEach(r => {
+            const remaining = Math.max(0, (r.unitsRequested || 0) - (r.unitsIssued || 0));
+            defaults[r.id] = String(Math.max(1, remaining));
+        });
+        setHospitalSending(defaults);
     };
 
     const fetchEmergencyRequests = () => {
@@ -49,7 +68,7 @@ const InventoryDashboard = () => {
             .then(res => {
                 const data = res.data || [];
                 setRequests(data);
-                mapDefaults(data);
+                mapEmergencyDefaults(data);
             })
             .catch(err => {
                 // Backward compatibility if backend wasn't restarted yet.
@@ -58,7 +77,7 @@ const InventoryDashboard = () => {
                         .then(res => {
                             const data = (res.data || []).map(r => ({ ...r, status: r.status || 'OPEN' }));
                             setRequests(data);
-                            mapDefaults(data);
+                            mapEmergencyDefaults(data);
                         })
                         .catch(innerErr => {
                             console.error('Error fetching fallback emergency requests', innerErr);
@@ -73,10 +92,27 @@ const InventoryDashboard = () => {
             });
     };
 
+    const fetchHospitalRequests = () => {
+        if (!canDispatchHospitalRequest) return;
+        setHospitalRequestError('');
+        axios.get('http://localhost:8080/api/hospital-requests', { params: { scope: 'ALL' } })
+            .then(res => {
+                const data = res.data || [];
+                setHospitalRequests(data);
+                mapHospitalDefaults(data);
+            })
+            .catch(err => {
+                console.error('Error fetching hospital requests', err);
+                setHospitalRequests([]);
+                setHospitalRequestError('Unable to load hospital requests.');
+            });
+    };
+
     useEffect(() => {
         fetchInventory();
         fetchEmergencyRequests();
-    }, [canDispatchEmergency]);
+        fetchHospitalRequests();
+    }, [canDispatchEmergency, canDispatchHospitalRequest]);
 
     const getStatusStyle = (status, safetyFlag) => {
         if (safetyFlag === 'BIO-HAZARD' || status === 'DISCARD') {
@@ -108,6 +144,29 @@ const InventoryDashboard = () => {
         }
     };
 
+    const handleSendHospital = async (requestId) => {
+        const units = parseInt(hospitalSending[requestId] || '0', 10);
+        if (!units || units <= 0) {
+            alert('Enter units to issue.');
+            return;
+        }
+
+        setHospitalDispatchLoading(requestId);
+        try {
+            await axios.put(`http://localhost:8080/api/hospital-requests/${requestId}/issue`, {
+                units,
+                actingUserId: user?.id
+            });
+            fetchHospitalRequests();
+            fetchInventory();
+        } catch (err) {
+            console.error(err);
+            alert(typeof err?.response?.data === 'string' ? err.response.data : 'Failed to issue blood.');
+        } finally {
+            setHospitalDispatchLoading(null);
+        }
+    };
+
     const bloodAnalytics = useMemo(() => {
         const data = {};
         inventory.forEach(item => {
@@ -126,9 +185,25 @@ const InventoryDashboard = () => {
 
     const activeRequests = requests.filter(r => (r.status || '').toUpperCase() !== 'FULFILLED');
     const fulfilledRequests = requests.filter(r => (r.status || '').toUpperCase() === 'FULFILLED');
+    const activeHospitalRequests = hospitalRequests.filter(r => (r.status || '').toUpperCase() !== 'ISSUED');
+    const issuedHospitalRequests = hospitalRequests.filter(r => (r.status || '').toUpperCase() === 'ISSUED');
 
     return (
-        <div className="container" style={{ padding: '2rem 1rem' }}>
+        <div style={{ minHeight: '100vh', width: '100%', position: 'relative', backgroundColor: '#F0F4FF' }}>
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${inventoryBackground})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                }}
+            />
+        <div className="container" style={{ position: 'relative', zIndex: 1, padding: '2rem 1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
                     <button
@@ -141,7 +216,7 @@ const InventoryDashboard = () => {
                     <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Inventory Management</h1>
                     <p style={{ color: 'var(--text-muted)' }}>Real-time blood stock monitoring</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => { fetchInventory(); fetchEmergencyRequests(); }}>
+                <button className="btn btn-primary" onClick={() => { fetchInventory(); fetchEmergencyRequests(); fetchHospitalRequests(); }}>
                     Refresh Data
                 </button>
             </div>
@@ -165,8 +240,19 @@ const InventoryDashboard = () => {
             )}
 
             {canDispatchEmergency && (
-                <div className="glass-panel" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
-                    <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Emergency Dispatch (Admin)</h2>
+                <div
+                    className="glass-panel"
+                    style={{
+                        padding: '1.25rem',
+                        marginBottom: '1.5rem',
+                        border: '1px solid #FCA5A5',
+                        background: 'linear-gradient(135deg, rgba(254,242,242,0.95) 0%, rgba(254,226,226,0.95) 100%)',
+                        boxShadow: '0 10px 30px rgba(185, 28, 28, 0.12)'
+                    }}
+                >
+                    <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: '#991B1B' }}>
+                        Emergency Dispatch (Admin)
+                    </h2>
                     {requestLoadError && <div style={{ color: '#B91C1C', marginBottom: '0.75rem' }}>{requestLoadError}</div>}
                     {requests.length === 0 && <div style={{ color: 'var(--text-muted)' }}>No emergency requests found.</div>}
 
@@ -251,6 +337,93 @@ const InventoryDashboard = () => {
                 </div>
             )}
 
+            {canDispatchHospitalRequest && (
+                <div className="glass-panel" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+                    <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Hospital Request Queue</h2>
+                    {hospitalRequestError && <div style={{ color: '#B91C1C', marginBottom: '0.75rem' }}>{hospitalRequestError}</div>}
+                    {hospitalRequests.length === 0 && <div style={{ color: 'var(--text-muted)' }}>No hospital requests found.</div>}
+
+                    {hospitalRequests.length > 0 && (
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            <div>
+                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem' }}>Open / Partial</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {activeHospitalRequests.map(req => {
+                                        const remaining = Math.max(0, (req.unitsRequested || 0) - (req.unitsIssued || 0));
+                                        return (
+                                            <div key={req.id} className="glass-panel" style={{ padding: '0.9rem' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                                    <div style={{ fontWeight: '600' }}>#{req.id} • {req.hospitalName} • {req.bloodType} • {req.priority}</div>
+                                                    <div style={{
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: '700',
+                                                        padding: '0.2rem 0.6rem',
+                                                        borderRadius: '9999px',
+                                                        background: (req.status || '').toUpperCase() === 'PARTIAL' ? '#FEF3C7' : '#FEE2E2',
+                                                        color: (req.status || '').toUpperCase() === 'PARTIAL' ? '#92400E' : '#991B1B'
+                                                    }}>
+                                                        {(req.status || 'OPEN').toUpperCase()}
+                                                    </div>
+                                                </div>
+                                                <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: '0.25rem 0 0.6rem' }}>
+                                                    Requested: {req.unitsRequested} • Issued: {req.unitsIssued} • Remaining: {remaining}
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        max={Math.max(1, remaining)}
+                                                        className="input-field"
+                                                        style={{ maxWidth: '120px' }}
+                                                        value={hospitalSending[req.id] || ''}
+                                                        onChange={e => setHospitalSending(prev => ({ ...prev, [req.id]: e.target.value }))}
+                                                    />
+                                                    <button
+                                                        className="btn btn-primary"
+                                                        onClick={() => handleSendHospital(req.id)}
+                                                        disabled={hospitalDispatchLoading === req.id}
+                                                    >
+                                                        {hospitalDispatchLoading === req.id ? 'Issuing...' : 'Issue Units'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    {activeHospitalRequests.length === 0 && <div style={{ color: 'var(--text-muted)' }}>No active hospital requests.</div>}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem' }}>Issued Orders</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {issuedHospitalRequests.map(req => (
+                                        <div key={req.id} className="glass-panel" style={{ padding: '0.9rem', background: '#F0FDF4' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                                <div style={{ fontWeight: '600' }}>#{req.id} • {req.hospitalName} • {req.bloodType} • {req.priority}</div>
+                                                <div style={{
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '700',
+                                                    padding: '0.2rem 0.6rem',
+                                                    borderRadius: '9999px',
+                                                    background: '#DCFCE7',
+                                                    color: '#166534'
+                                                }}>
+                                                    ISSUED
+                                                </div>
+                                            </div>
+                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                                                Requested: {req.unitsRequested} • Issued: {req.unitsIssued}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {issuedHospitalRequests.length === 0 && <div style={{ color: 'var(--text-muted)' }}>No issued hospital orders yet.</div>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
             <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
@@ -298,6 +471,7 @@ const InventoryDashboard = () => {
                     </tbody>
                 </table>
             </div>
+        </div>
         </div>
     );
 };

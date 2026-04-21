@@ -5,6 +5,7 @@
 # Backend (Java/Spring Boot)
 lifeline-backend/target/
 *.class
+application.properties
 
 # Frontend (React/Node)
 lifeline-frontend/dist/

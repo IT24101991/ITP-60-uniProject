@@ -1,7 +1,5 @@
 # LifeLine: Centralized Blood Donation & Management System
 
-<<<<<<< HEAD
-=======
 ## System Architecture
 
 ```text
@@ -46,8 +44,7 @@
                   +----------------------------+
 ```
 
->>>>>>> imasha
-This guide outlines how to set up and run the LifeLine project using **IntelliJ IDEA**.
+**.
 
 ## Prerequisites
 

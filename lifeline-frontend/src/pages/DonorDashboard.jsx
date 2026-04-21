@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import donorBackground from '../assets/donorportal.jpg';
 
 const DonorDashboard = () => {
     const navigate = useNavigate();
@@ -74,7 +75,21 @@ const DonorDashboard = () => {
     const totalVolume = completedCount * 0.5;
 
     return (
-        <div className="container" style={{ padding: '2rem 1rem' }}>
+        <div style={{ minHeight: '100vh', width: '100%', position: 'relative', backgroundColor: '#F0F4FF' }}>
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundImage: `linear-gradient(rgba(240, 244, 255, 0.72), rgba(255, 228, 230, 0.72)), url(${donorBackground})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                }}
+            />
+        <div className="container" style={{ position: 'relative', zIndex: 1, padding: '2rem 1rem' }}>
             <header style={{ marginBottom: '3rem' }}>
                 <button
                     className="btn"
@@ -84,7 +99,7 @@ const DonorDashboard = () => {
                     Back
                 </button>
                 <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Donor Portal</h1>
-                <p style={{ color: 'var(--text-muted)' }}>Welcome back, Hero.</p>
+                <p style={{ color: 'var(--text-muted)' }}>Welcome back :)</p>
                 {donorData?.safetyStatus === 'POSITIVE' && (
                     <div style={{ 
                         marginTop: '1.5rem', 
@@ -203,6 +218,7 @@ const DonorDashboard = () => {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     );
 };

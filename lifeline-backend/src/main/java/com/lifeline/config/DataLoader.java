@@ -52,6 +52,20 @@ public class DataLoader implements CommandLineRunner {
         admin.setRole(User.Role.ADMIN);
         userRepository.save(admin);
 
+        User hospital = new User();
+        hospital.setName("Colombo National Hospital");
+        hospital.setEmail("hospital@lifeline.com");
+        hospital.setPassword("hospital123");
+        hospital.setRole(User.Role.HOSPITAL);
+        userRepository.save(hospital);
+
+        User lab = new User();
+        lab.setName("Lab Technician");
+        lab.setEmail("lab@lifeline.com");
+        lab.setPassword("lab123");
+        lab.setRole(User.Role.LAB);
+        userRepository.save(lab);
+
         // Donor 1: Eligible
         User user1 = new User(null, "John Doe", "john@example.com", "pass123", User.Role.DONOR);
         userRepository.save(user1);

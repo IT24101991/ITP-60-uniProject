@@ -1,5 +1,14 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import api from '../services/api';
+import {
+    canApproveAppointments,
+    canCreateHospitalRequest,
+    canDispatchHospitalRequest,
+    canDispatchEmergency,
+    canManageCredentials,
+    canViewInventory,
+    canViewLab
+} from '../constants/permissions';
 
 const AuthContext = createContext(null);
 
@@ -8,12 +17,18 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check local storage for persistent login (mock)
-        const storedUser = localStorage.getItem('lifeline_user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
+        const hydrateAuth = async () => {
+            try {
+                const response = await api.get('/api/auth/me');
+                setUser(response?.data || null);
+            } catch {
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        hydrateAuth();
     }, []);
 
     const login = async (email, password) => {
@@ -29,7 +44,6 @@ export const AuthProvider = ({ children }) => {
         };
 
         setUser(userData);
-        localStorage.setItem('lifeline_user', JSON.stringify(userData));
         return userData;
     };
 
@@ -53,13 +67,21 @@ export const AuthProvider = ({ children }) => {
             nearestHospital: data.nearestHospital
         };
         setUser(newUser);
+<<<<<<< HEAD
         localStorage.setItem('lifeline_user', JSON.stringify(newUser));
+=======
+>>>>>>> 8a481ac751daa3abc140972bf4f03334cf62e322
         return newUser;
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('lifeline_user');
+    const logout = async () => {
+        try {
+            await api.post('/api/auth/logout');
+        } catch {
+            // Even if backend logout fails, clear local auth state.
+        } finally {
+            setUser(null);
+        }
     };
 
     const value = {
@@ -70,7 +92,13 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated: !!user,
         isAdmin: user?.role === 'ADMIN',
-        isDoctor: user?.role === 'DOCTOR' || user?.role === 'HOSPITAL' || user?.role === 'ADMIN'
+        canViewInventory: canViewInventory(user?.role),
+        canViewLab: canViewLab(user?.role),
+        canApproveAppointments: canApproveAppointments(user?.role),
+        canManageCredentials: canManageCredentials(user?.role),
+        canCreateHospitalRequest: canCreateHospitalRequest(user?.role),
+        canDispatchHospitalRequest: canDispatchHospitalRequest(user?.role),
+        canDispatchEmergency: canDispatchEmergency(user?.role)
     };
 
     return (
