@@ -1,0 +1,11 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.lifeline:lifeline-backend >--------------------
+[INFO] Building lifeline-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.2:run (default-cli) > test-compile @ lifeline-backend >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ lifeline-backend ---
+[INFO] skip non existing resourceDirectory C:\Users\www\OneDrive\Desktop\Blood Donation\ITP-60-uniProject\lifeline-backend\src\main\resources

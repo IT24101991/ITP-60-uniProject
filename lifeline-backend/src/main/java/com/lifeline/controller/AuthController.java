@@ -51,11 +51,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-<<<<<<< HEAD
-    public ResponseEntity<?> register(@RequestBody Map<String, String> payload) {
-=======
     public ResponseEntity<?> register(@RequestBody Map<String, String> payload, HttpSession session) {
->>>>>>> 8a481ac751daa3abc140972bf4f03334cf62e322
         String fullName = payload.get("fullName");
         String email = payload.get("email");
         String password = payload.get("password");
@@ -86,18 +82,11 @@ public class AuthController {
         donor.setSafetyStatus("SAFE");
         donorRepository.save(donor);
 
-<<<<<<< HEAD
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-=======
         Map<String, Object> userData = Map.of(
->>>>>>> 8a481ac751daa3abc140972bf4f03334cf62e322
                 "role", savedUser.getRole().name(),
                 "userId", savedUser.getId(),
                 "name", savedUser.getName(),
                 "email", savedUser.getEmail()
-<<<<<<< HEAD
-        ));
-=======
         );
         session.setAttribute(SESSION_USER_KEY, userData);
         return ResponseEntity.status(HttpStatus.CREATED).body(userData);
@@ -116,6 +105,5 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpSession session) {
         session.invalidate();
         return ResponseEntity.ok(Map.of("message", "Logged out"));
->>>>>>> 8a481ac751daa3abc140972bf4f03334cf62e322
     }
 }
