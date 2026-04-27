@@ -67,10 +67,6 @@ export const AuthProvider = ({ children }) => {
             nearestHospital: data.nearestHospital
         };
         setUser(newUser);
-<<<<<<< HEAD
-        localStorage.setItem('lifeline_user', JSON.stringify(newUser));
-=======
->>>>>>> 8a481ac751daa3abc140972bf4f03334cf62e322
         return newUser;
     };
 

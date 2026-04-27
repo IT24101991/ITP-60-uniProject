@@ -6,12 +6,7 @@ import inventoryBackground from '../assets/inventory.png';
 
 const InventoryDashboard = () => {
     const navigate = useNavigate();
-<<<<<<< HEAD
-    const { isAdmin, isDoctor } = useAuth();
-    const canDispatchEmergency = isAdmin || isDoctor;
-=======
     const { user, isAdmin, canDispatchEmergency, canDispatchHospitalRequest } = useAuth();
->>>>>>> 8a481ac751daa3abc140972bf4f03334cf62e322
 
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(true);
